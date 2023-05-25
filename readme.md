@@ -297,7 +297,7 @@ terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-read
 ```sh
 terraform destroy
 ```
-### Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
+### Demora cerca de 1~2 minutos para que o resto dos recursos sejam destruídos
 ### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
 
 #<a name="AMI"></a> 
