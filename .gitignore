@@ -1,0 +1,9 @@
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+.terraform
+KEY1.pem
+KEY2.pem
+KEY3.pem
+KEY4.pem
+plano
