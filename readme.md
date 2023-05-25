@@ -355,6 +355,7 @@ Inicie o backend da arquitetura
 /~ # git clone https://github.com/raulikeda/tasks.git
 /~ # sudo apt-get update
 /~ # sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+/~ # sudo apt install python3-pip
 /~ # pip install mysqlclient
 /~ # sudo apt install mysql-server
 /~ # sudo apt-get upgrade -y
@@ -383,18 +384,19 @@ efs_mount_point_1="EFS"
 sudo mkdir -p "${efs_mount_point_1}"
 
 if test -f "/sbin/mount.efs"; then
-  printf "\n${file_system_id_1}:/ ${efs_mount_point_1} efs tls,_netdev\n" >> /etc/fstab
+  printf "\n${file_system_id_1}:/ ${efs_mount_point_1} efs tls,_netdev\n" | sudo tee -a /etc/fstab
 else
-  printf "\n${file_system_id_1}.efs.us-east-1.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize>fi
+  printf "\n${file_system_id_1}.efs.us-east-1.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0\n" | sudo tee -a /etc/fstab
+fi
 
 if test -f "/sbin/mount.efs" && ! grep -ozP 'client-info]\nsource' '/etc/amazon/efs/efs-utils.conf'; then
-  printf "\n[client-info]\nsource=liw\n" >> /etc/amazon/efs/efs-utils.conf
+  printf "\n[client-info]\nsource=liw\n" | sudo tee -a /etc/amazon/efs/efs-utils.conf
 fi
 
 retryCnt=15
 waitTime=30
 while true; do
-  mount -a -t efs,nfs4 defaults
+  sudo mount -a -t efs,nfs4 defaults
   if [ $? -eq 0 ] || [ $retryCnt -lt 1 ]; then
     echo "File system mounted successfully"
     break
