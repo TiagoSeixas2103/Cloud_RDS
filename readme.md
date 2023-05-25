@@ -201,8 +201,8 @@ Password: #[Insira senha]
 
 ## Testando django
 
-  * Agora que o seu django tem uma database para utilizar, volte para a pasta tasks, crie o superuser e realize as migrações necessárias
-  * Há um executável que faz isso
+  * Agora que o seu django tem uma database para utilizar, volte para a pasta tasks, crie o superuser, baixe as bibliotecas e realize as migrações necessárias
+  * Há um executável que faz isso, feito por Raul Ikeda
 ```sh
 /~/tasks/portfolio # cd ..
 /~/tasks # ./install.sh
@@ -354,7 +354,6 @@ Inicie o backend da arquitetura
 ```sh
 /~ # git clone https://github.com/raulikeda/tasks.git
 /~ # sudo apt-get update
-/~ # sudo apt-get mysqlclient
 /~ # sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
 /~ # pip install mysqlclient
 /~ # sudo apt install mysql-server
