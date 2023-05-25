@@ -315,8 +315,8 @@ terraform destroy
 ```
   * Pegue o id da AMI Ubuntu selecionando no Dashboard de EC2 a opção de criar uma nova instância, e Ubuntu como Imagem
   * Abra os arquivos ec2.tf, provisioner.tf e rds.tf no VSCode
-  * Comente temporariamente as 3 instâncias aws_db_instance no arquivo rds.tf (ou seja, comente tudo menos o provider)
-  * Comente temporariamente todo o arquivo provisioner.tf (Ctrl+A e Shift+Alt+A)
+  * Comente temporariamente as 3 instâncias aws_db_instance no arquivo rds.tf (ou seja, comente tudo menos o provider no começo)
+  * Comente temporariamente as duas instâncias null_resource no arquivo provisioner.tf
   * Mude a AMI usada pelas quatro instâncias EC2 no arquivo ec2.tf, inserindo o id pego na AWS
 ```sh
 ami             = #Inserir ID da Imagem
