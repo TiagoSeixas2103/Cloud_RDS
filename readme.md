@@ -577,6 +577,7 @@ def index(request):
   * No terminal, na pasta do projeto, destrua os recursos usando os comandos a seguir na ordem dada, para evitar que fique destruindo para sempre
 
 ```sh
+/projeto_cloud # terraform init
 /projeto_cloud # terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
 /projeto_cloud # terraform destroy
 ```
