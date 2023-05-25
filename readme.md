@@ -160,8 +160,8 @@ Credentials
 /projeto_cloud # terraform apply "plano"
 ```
 
-## Demora cerca de 25~30 minutos para que todos os recursos sejam criados
-## Espere até receber a mensagem <span style="color:green">Apply complete!</span>
+### Demora cerca de 25~30 minutos para que todos os recursos sejam criados
+### Espere até receber a mensagem <span style="color:green">Apply complete!</span>
 
  * Confira no AWS Management Console se a Zona de disponibilidade é us-east-1a ou us-east-1b, para depois fazer o teste de failover de Multi A-Z corretamente
  * Uma vez que todas as instâncias foram criadas, conecte-se à instância EC2_maindbA ou EC2-maindbB (dependendo da Zona) pelo AWS Management Console ou pelo terminal da sua máquina
@@ -289,16 +289,16 @@ Caso queira entrar na Instância EC2_readDB2:
 ```sh
 terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
 ```
-## Demora cerca de 10~15 minutos para que os recursos sejam destruídos
-## Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
+### Demora cerca de 10~15 minutos para que os recursos sejam destruídos
+### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
 
   * Por fim, destrua o resto dos recursos
 
 ```sh
 terraform destroy
 ```
-## Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
-## Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
+### Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
+### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
 
 #<a name="AMI"></a> 
 # Criando AMI do Zero
