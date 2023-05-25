@@ -126,7 +126,8 @@ Credentials
 [Cria AMI](#AMI)
 ### Se tiver acesso à conta AWS, NÃO faça essa etapa, pois a execução deste projeto já é bem demorada
 
-# <a name="Executa"></a> Executando projeto
+#<a name="Executa"></a>
+# Executando projeto
 
 ### <span style="color:red">Atenção!</span> 
 ### Não saia copiando direto os comandos!
@@ -299,7 +300,8 @@ terraform destroy
 ## Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
 ## Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
 
-# <a name="AMI"></a> Criando AMI do Zero
+#<a name="AMI"></a> 
+# Criando AMI do Zero
 
   * Caso a imagem do projeto tenha sido perdida, ou você seja uma pessoa sem acesso à conta AWS na qual o projeto foi feito, siga os passos a seguir
   * Caso contrário, o projeto terminou na etapa anterior
