@@ -122,12 +122,11 @@ Credentials
 ### NÃO continue sem ter um usuário na conta do grupo H!
 ### Como mencionado antes, foi utilizada uma imagem AMI personalizada
 ### Caso a conta tenha sido perdida, ou você não tenha acesso vá para o guia de criação da AMI desse projeto após Destruindo Recursos (ainda precisa ter o projeto clonado, não basta só ler o readme)
-### Se tiver acesso à conta AWS, NÃO faça essa etapa, pois a execução deste projeto já é bem demorada
 ### Procure pelo título Criando AMI do Zero, conforme desce no readme, ou clique no link se estiver lendo o readme no github
 [Cria AMI](#AMI)
+### Se tiver acesso à conta AWS, NÃO faça essa etapa, pois a execução deste projeto já é bem demorada
 
-#<a name="Executa"></a> Executando projeto
-## Executando projeto
+# <a name="Executa"></a> Executando projeto
 
 ### <span style="color:red">Atenção!</span> 
 ### Não saia copiando direto os comandos!
@@ -300,8 +299,7 @@ terraform destroy
 ## Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
 ## Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
 
-#<a name="AMI"></a> Cria AMI
-# Criando AMI do Zero
+# <a name="AMI"></a> Criando AMI do Zero
 
   * Caso a imagem do projeto tenha sido perdida, ou você seja uma pessoa sem acesso à conta AWS na qual o projeto foi feito, siga os passos a seguir
   * Caso contrário, o projeto terminou na etapa anterior
@@ -582,6 +580,7 @@ def index(request):
   * Mude o id das imagens das instâncias EC2 em ec2.tf para o id da imagem AMI que você criou
   * Volte no readme para a parte Executando projeto
 
+### Procure pelo título Executando projeto, conforme sobe no readme, ou clique no link se estiver lendo o readme no github, para começar a arquitetura do projeto
 [Executando Projeto](#Executa)
 
 
