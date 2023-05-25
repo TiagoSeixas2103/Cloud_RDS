@@ -75,7 +75,8 @@ resource "null_resource" "provisioner" {
 
 # Andiciona ID de EFS no arquivo de montagem de EFS nas Instâncias EC2
 resource "null_resource" "provisioner2" {
-  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_instance.EC2-readDB1, aws_instance.EC2-readDB2]
+  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_instance.EC2-readDB1, aws_instance.EC2-readDB2,
+  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B]
 
   provisioner "remote-exec" {
     inline = [

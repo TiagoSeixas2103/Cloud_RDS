@@ -1,6 +1,6 @@
 #EC2 RDS Zone A
 resource "aws_instance" "EC2-maindbA" {
-    ami             = "ami-0f5fce3c3f4d0330f"               # Imagem ubuntu personalizada
+    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
     instance_type   = "t2.micro"                            # Tipo de instância EC2
     key_name        = aws_key_pair.chave-maindbA.key_name    # Key Pair utilizado
     tags            = {
@@ -13,7 +13,7 @@ resource "aws_instance" "EC2-maindbA" {
 
 #EC2 RDS Zone B
 resource "aws_instance" "EC2-maindbB" {
-    ami             = "ami-0f5fce3c3f4d0330f"               # Imagem ubuntu personalizada
+    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
     instance_type   = "t2.micro"                            # Tipo de instância EC2
     key_name        = aws_key_pair.chave-maindbB.key_name    # Key Pair utilizado
     tags            = {
@@ -26,7 +26,7 @@ resource "aws_instance" "EC2-maindbB" {
 
 #EC2 Read RDS Zone A
 resource "aws_instance" "EC2-readDB1" {
-    ami             = "ami-0f5fce3c3f4d0330f"               # Imagem ubuntu personalizada
+    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
     instance_type   = "t2.micro"                            # Tipo de instância EC2
     key_name        = aws_key_pair.chave-readdb1.key_name   # Key Pair utilizado
     tags            = {
@@ -39,7 +39,7 @@ resource "aws_instance" "EC2-readDB1" {
 
 #EC2 Read RDS Zone B
 resource "aws_instance" "EC2-readDB2" {
-    ami             = "ami-0f5fce3c3f4d0330f"               # Imagem ubuntu personalizada
+    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
     instance_type   = "t2.micro"                            # Tipo de instância EC2
     key_name        = aws_key_pair.chave-readdb2.key_name   # Key Pair utilizado
     tags            = {
