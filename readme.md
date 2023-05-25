@@ -30,10 +30,7 @@ Para executar essa arquitetura, verifique se os seguintes requisitos foram cumpr
     - https://console.aws.amazon.com/ec2/
         
       - Selecione: Instâncias
-
-### <span style="color:red">Atenção!</span> NÃO continue sem ter um usuário na conta do grupo H! <span style="color:red">Atenção!</span>
-### <span> Como mencionado antes, foi utilizada uma imagem AMI personalizada</span>
-### <span> Caso a conta tenha sido perdida, mais abaixo no readme, após o destroy, tem um guia para criar uma nova imagem AMI usando ubuntu e uma instância EC2</span>
+  * Este repositório git
 
 ## Estrutura do Projeto
 
@@ -121,39 +118,29 @@ Credentials
   * variable "username" - Usuário RDS
   * variable "password" - Senha RDS
 
+### <span style="color:red">Atenção!</span> 
+### NÃO continue sem ter um usuário na conta do grupo H!
+### Como mencionado antes, foi utilizada uma imagem AMI personalizada
+### Caso a conta tenha sido perdida, ou você não tenha acesso vá para o guia de criação da AMI desse projeto após Destruindo Recursos (ainda precisa ter o projeto clonado, não basta só ler o readme)
+### Se tiver acesso à conta AWS, NÃO faça essa etapa, pois a execução deste projeto já é bem demorada
+### Procure pelo título Criando AMI do Zero, conforme desce no readme, ou clique no link se estiver lendo o readme no github
+[Cria AMI](#AMI)
+
+#<a name="Executa"></a> Executando projeto
 ## Executando projeto
 
-### <span style="color:red">Atenção!</span> Não saia copiando direto os comandos! <span style="color:red">Atenção!</span>
+### <span style="color:red">Atenção!</span> 
+### Não saia copiando direto os comandos!
 ### Leia as instruções primeiro e preste atenção aos comandos em si!
 
-  * Entre na pasta do projeto, e atribua as suas credenciais a um profile, usando o comando abaixo
+  * Entre na pasta do projeto, passe as credenciais da conta IAM na AWS
+  * Se fez o tutorial de criação de AMI, não precisa passar as credenciais de novo
 ```sh
-/projeto_cloud # aws configure --profile [Inserir nome do usuário IAM]
+/projeto_cloud # export AWS_ACCESS_KEY_ID="AKXXXXXXXXXXXXXXXXXX"
+/projeto_cloud # export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ```
 
-### Ao rodar o comando anterior, preencha os campos de input conforme eles forem aparecendo, como exemplificado abaixo
-```sh
-AWS Access Key ID [****************XXXX]: # [Inserir Access Key ID]
-AWS Secret Access Key [****************XXXX]:  # [Secret Access Key]
-Default region name [None]: # us-east-1
-Default output format [None]: # [Deixar em branco]
-
-```
-
-  * Após atribuir as credenciais ao profile que você criou, cheque se o mesmo foi criado (ou alterado)
-  corretamente com os comandos abaixo:
-```sh
-/projeto_cloud # aws configure list-profiles
-/projeto_cloud # aws configure list --profile [Inserir nome do usuário IAM]
-```
-
-  * Uma vez que você tenha confirmado que o profile foi criado, e que suas credenciais foram corretamente 
-  atribuídas, exporte esse profile para ser usado como default:
-```sh
-/projeto_cloud # export AWS_PROFILE=[Inserir nome do usuário IAM]
-```
-
-  * Agora que já foi configurado o profile, ainda dentro da pasta 'projeto_cloud', dê o comando para iniciar a arquitetura
+  * Com o profile configurado, ainda dentro da pasta 'projeto_cloud', dê o comando para iniciar o backend da arquitetura
 ```sh
 /projeto_cloud # terraform init
 ```
@@ -190,7 +177,8 @@ Caso queira entrar na Instância EC2_maindbB:
 /projeto_cloud # ssh -i KEY2.pem ubuntu@[Inserir IPV4 EC2_maindbB]
 ```
 
-### <span style="color:red">Atenção!</span> Note que a chave .pem muda dependendo do EC2! <span style="color:red">Atenção!</span>
+### <span style="color:red">Atenção!</span> 
+### Note que a chave .pem muda dependendo do EC2!
 ### As chaves existentes foram mencionadas anteriormente quando o arquivo key.tf foi explicado
 
   * Assim que se conectar à instância, entre na pasta portfolio, dentro da pasta tasks, e crie a database na instância
@@ -198,8 +186,8 @@ Caso queira entrar na Instância EC2_maindbB:
   * Para facilitar, foi criado um executável 'createdb.sh', que foi atualizado com o provisioner, você só precisa rodá-lo
   * Tenha aberto o arquivo credentials.tf para pegar a senha da sua database
 ```sh
-/~/ # cd tasks/portfolio
-/~/tasks/portfolio/ # ./createdb.sh
+/~ # cd tasks/portfolio
+/~/tasks/portfolio # ./createdb.sh
 ```
 ### Lembre-se, é necessário colocar a senha do arquivo credentials.tf, que é a senha do RDS, para poder acessá-lo
 ```sh
@@ -216,12 +204,12 @@ Password: #[Insira senha]
   * Agora que o seu django tem uma database para utilizar, volte para a pasta tasks, crie o superuser e realize as migrações necessárias
   * Há um executável que faz isso
 ```sh
-/~/tasks/portfolio/ # cd ..
-/~/tasks/ # ./install.sh
+/~/tasks/portfolio # cd ..
+/~/tasks # ./install.sh
 ```
   * Agora use o comando a seguir para rodar o app django:
 ```sh
-/~/tasks/ # python3 manage.py runserver 0.0.0.0:8000
+/~/tasks # python3 manage.py runserver 0.0.0.0:8000
 ```
   * Com o django rodando, pegue o IPv4 público da instância EC2, no mesmo dashboard onde pegou o DNS
   * Com o IP, acesse os seguintes links em abas diferentes no seu navegador
@@ -233,8 +221,9 @@ http://[IPv4]:8000/admin
   * Quando você adicionar uma task ao django pela aba admin, você pode ver que ela foi criada dando refresh na outra aba
 
 ## Testando Failover Zona Main (Multi A-Z)
-  * Selecione o RDS mainDB no AWS Management Console e, em ações, dê um reboot, selecionando a opção com failover
-### <span style="color:red">Atenção!</span> Espere de 1 a 3 minutos APÓS a reinicialização terminar! <span style="color:red">Atenção!</span>
+  * Selecione o RDS mainDB no AWS Management Console e, em ações, selecione Reinicializar (reboot), selecionando a opção com failover
+### <span style="color:red">Atenção!</span> 
+### Espere de 1 a 3 minutos APÓS a reinicialização terminar!
   * Ao checar a Zona de Disponibilidade, você verá que ela mudou
   * Caso você tenha seguido corretamente os passos anteriores, a EC2 na qual você está conectado se encontra na mesma Zona que a RDS Primária
   * Mude para a instância EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região original do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
@@ -268,33 +257,32 @@ Caso queira entrar na Instância EC2_readDB2:
 ```
 ### Importante lembrar que a chave .pem para acessar essa nova instância é diferente em cada EC2
 
-  * Caso esteja na pasta tasks ou portfolio em alguma das conexões, volte para a pasta inicial onde está o arquivo creatEFS.sh e a pasta task
+  * Caso esteja na pasta tasks ou portfolio em alguma das conexões, volte para a pasta inicial onde está o arquivo creatEFS.sh
 ```sh
-/~/tasks/ # cd ..
-/~/ # ls
-tasks creatEFS.sh
+/~/tasks # cd
 ```
   * Execute o arquivo de montagem do EFS nas duas Instâncias EC2
 ```sh
-/~/ # sudo ./creatEFS.sh
+/~ # sudo ./creatEFS.sh
 ```
   * Entre na pasta EFS criada nas duas Instâncias EC2, e veja o conteúdo delas
 ```sh
-/~/ # cd EFS
-/~/EFS/ # ls
+/~ # cd EFS
+/~/EFS # ls
 ```
   * Em uma das instâncias, crie um arquivo qualquer
 ```sh
-/~/EFS/ # sudo touch teste.txt
+/~/EFS # sudo touch teste.txt
 ```
   * Na outra instância EC2, confirme se esse arquivo foi criado
 ```sh
-/~/EFS/ # ls
+/~/EFS # ls
 ```
 
 ## Destruindo Recursos
 
-### <span style="color:red">Atenção!</span> NÃO dê terraform destroy direto! <span style="color:red">Atenção!</span>
+### <span style="color:red">Atenção!</span> 
+### NÃO dê terraform destroy direto!
 ### Se você fizer isso, tem altas chances de ficar esperando a destruição dos recursos para sempre!
 
   * Para destruir os recursos, rode primeiro o seguinte comando:
@@ -311,3 +299,290 @@ terraform destroy
 ```
 ## Demora cerca de 5~10 segundos para que o resto dos recursos sejam destruídos
 ## Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
+
+#<a name="AMI"></a> Cria AMI
+# Criando AMI do Zero
+
+  * Caso a imagem do projeto tenha sido perdida, ou você seja uma pessoa sem acesso à conta AWS na qual o projeto foi feito, siga os passos a seguir
+  * Caso contrário, o projeto terminou na etapa anterior
+
+### <span style="color:red">Atenção!</span> 
+### Modifique as instâncias EC2 antes de dar deploy para usar a imagem AMI de ubuntu fornecida pela AWS
+  * Clone o repositório, e na pasta do projeto, passe as credenciais da sua conta IAM na AWS
+```sh
+/projeto_cloud # export AWS_ACCESS_KEY_ID="AKXXXXXXXXXXXXXXXXXX"
+/projeto_cloud # export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+```
+  * Pegue o id da AMI Ubuntu selecionando no Dashboard de EC2 a opção de criar uma nova instância, e Ubuntu como Imagem
+  * Abra os arquivos ec2.tf, provisioner.tf e rds.tf no VSCode
+  * Comente temporariamente as 3 instâncias aws_db_instance no arquivo rds.tf (ou seja, comente tudo menos o provider)
+  * Comente temporariamente todo o arquivo provisioner.tf (Ctrl+A e Shift+Alt+A)
+  * Mude a AMI usada pelas quatro instâncias EC2 no arquivo ec2.tf, inserindo o id pego na AWS
+```sh
+ami             = #Inserir ID da Imagem
+```
+Inicie o backend da arquitetura
+```sh
+/projeto_cloud # terraform init
+```
+
+  * Valide que a infraestrutura está funcionando:
+```sh
+/projeto_cloud # terraform validate
+```
+
+  * Crie o plano no terraform:
+```sh
+/projeto_cloud # terraform plan -out plano
+```
+
+  * Execute o plano:
+```sh
+/projeto_cloud # terraform apply "plano"
+```
+### Espere 2-3 minutos para tudo ser criado
+
+  * Entre na Instância EC2_maindbA:
+```sh
+/projeto_cloud # ssh -i KEY1.pem ubuntu@[Inserir IPV4 EC2_maindbA]
+```
+  * Clone o exemplo de aplicativo Django do github do Raul Ikeda, e baixe as bibliotecas necessárias
+  * Importante apontar que algumas das bibliotecas solicitam confirmação
+  * Confirme ou dê enter quando necessário, sem alterar nada
+  * Ignore quaiquer mensagens de output, algumas bibliotecas apenas não existem, mas estão sendo baixadas baseadas no history da AMI original
+
+```sh
+/~ # git clone https://github.com/raulikeda/tasks.git
+/~ # sudo apt-get update
+/~ # sudo apt-get mysqlclient
+/~ # sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+/~ # pip install mysqlclient
+/~ # sudo apt install mysql-server
+/~ # sudo apt-get upgrade -y
+/~ # sudo apt-get -y install amazon-efs-utils
+/~ # sudo apt-get -y install nfs-common
+``` 
+
+* Crie um arquivo executável creatEFS.sh
+* Esse é o arquivo responsável por montar o Elastic File System na Instância EC2
+```sh
+/~ # sudo nano creatEFS.sh
+```
+
+  * O Conteúdo de creatEFS.sh deve ser o seguinte:
+```sh
+sudo apt-get update
+sudo apt-get upgrade -y
+
+sudo apt-get -y install amazon-efs-utils
+
+sudo apt-get -y install nfs-common
+
+file_system_id_1="ID_EFS"
+efs_mount_point_1="EFS"
+
+sudo mkdir -p "${efs_mount_point_1}"
+
+if test -f "/sbin/mount.efs"; then
+  printf "\n${file_system_id_1}:/ ${efs_mount_point_1} efs tls,_netdev\n" >> /etc/fstab
+else
+  printf "\n${file_system_id_1}.efs.us-east-1.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize>fi
+
+if test -f "/sbin/mount.efs" && ! grep -ozP 'client-info]\nsource' '/etc/amazon/efs/efs-utils.conf'; then
+  printf "\n[client-info]\nsource=liw\n" >> /etc/amazon/efs/efs-utils.conf
+fi
+
+retryCnt=15
+waitTime=30
+while true; do
+  mount -a -t efs,nfs4 defaults
+  if [ $? -eq 0 ] || [ $retryCnt -lt 1 ]; then
+    echo "File system mounted successfully"
+    break
+  fi
+  echo "File system not available, retrying to mount."
+  ((retryCnt--))
+  sleep $waitTime
+done
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+  * O ID_EFS é inserido nesse arquivo pelo provisioner2, comentado anteriormente
+  * Esse código foi pego na AWS (Criação manual de uma EC2, em Detalhes Avançados, opção Dados do usuário) e então adaptado
+  * Só aparece após adicionar um Sistema de Arquivos EFS nessa inicialização
+  * Transforme em executável
+
+```sh
+/~ # sudo chmod +x creatEFS.sh
+```
+
+  * Entre na pasta tasks/portfolio, e crie o arquivo executável createdb.sh
+  * Esse é o arquivo responsável por criar uma database mysql na Instância RDS, e alterar o arquivo settings.py do Django para acessar essa database
+
+```sh
+/~ # cd tasks/portfolio
+/~/tasks/portfolio # sudo nano createdb.sh
+```
+
+* O Conteúdo de createdb.sh deve ser o seguinte:
+```sh
+DB_HOST="endereco"
+DB_USER="usuario"
+DB_NAME="dbmain01"
+DB_PASS="senha"
+DB_OLD="DB_NAME"
+
+#Mudar apenas caso queira mudar de uma database para outra
+
+#Atualiza os valores em settings.py
+sed -i "s/"$DB_OLD"/"$DB_NAME"/g" settings.py
+sed -i "s/DB_USER/"$DB_USER"/g" settings.py
+sed -i "s/DB_PASS/"$DB_PASS"/g" settings.py
+sed -i "s/DB_HOST/"$DB_HOST"/g" settings.py
+
+#Cria database
+mysql -h "$DB_HOST" -u "$DB_USER" -e "CREATE DATABASE $DB_NAME;" -p
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+  * Os valores endereco, usuario e senha serão substituídos por valores do RDS pelo provisioner após o apply
+  * Torne o arquivo executável
+```sh
+/~/tasks/portfolio # sudo chmod +x createdb.sh
+```
+
+  * Ainda nessa pasta portfolio, entre em settings.py e mude INSTALLED_APPS e DATABASES
+  * No caso de INSTALLED_APPS, a única mudança é que 'tasks.apps.TasksConfig' foi movido para a posição de primeiro item
+```sh
+/~/tasks/portfolio # sudo nano settings.py
+```
+```sh
+INSTALLED_APPS = [
+    'tasks.apps.TasksConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'DB_NAME',
+        'USER': 'DB_USER',
+        'PASSWORD': 'DB_PASS',
+        'HOST': 'DB_HOST',
+        'PORT': '3306',
+        'OPTIONS': {
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        },
+    }
+}
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+  * Os valores DB_NAME, DB_USER, DB_PASS e DB_HOST são atualizados por createdb.sh, como mencionado
+  * Ainda nessa pasta portfolio, entre em urls.py e modifique o arquivo, adicionando um path '' a urlpatterns, de forma a ver as tasks criadas direto na página principal do app
+```sh
+/~/tasks/portfolio # sudo nano urls.py
+```
+```sh
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('tasks/', include('tasks.urls')),
+    path('', include('tasks.urls')),
+]
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+
+  * Saia da aba portfolio, e entre na aba tasks
+```sh
+/~/tasks/portfolio # cd ..
+/~/tasks # cd tasks
+/~/tasks/tasks
+```
+  * Entre em apps.py e adicione um default_auto_field à classe Tasksconfig, como a seguir, para evitar erro na criação de tasks
+```sh
+/~/tasks/tasks # sudo nano apps.py
+```
+```sh
+class TasksConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'tasks
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+
+  * Entre em views.py, e altere o arquivo para mapear as tasks criadas, e renderizar o html para visualizá-las
+```sh
+/~/tasks/tasks # sudo nano views.py
+```
+```sh
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from .models import Task
+
+# Create your views here.
+
+
+def index(request):
+    #return HttpResponse("Hello, world. You're at the tasks index.")
+    all_tasks = Task.objects.order_by('title')
+    return render(request, 'tasks/index.html', {'tasks': all_tasks})
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+
+  * Crie um diretório chamado templates, dentro dele crie um diretório tasks, e entre nesse diretório tasks
+
+```sh
+/~/tasks/tasks # sudo mkdir templates
+/~/tasks/tasks # cd templates
+/~/tasks/tasks/templates # sudo mkdir tasks
+/~/tasks/tasks/templates # cd tasks
+/~/tasks/tasks/templates/tasks
+```
+  * Nesse diretório tasks, crie um arquivo index.html, que sera renderizado para visualização das tasks, como mencionado anteriormente
+
+```sh
+/~/tasks/tasks/templates/tasks # sudo nano index.html
+```
+
+  * Como o propósito desse projeto era testar o funcionamento da arquitetura em nuvem, o app é bem simples, mostrando apenas o título das tasks criadas pelo admin
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tasks Index</title>
+</head>
+<body>
+    <h1>Tasks</h1>
+    <ul>
+        {% for task in tasks %}
+        <li>{{ task.title }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+  * Selecione no Dashboard das Instâncias EC2 a Instância na qual você está conectado (se seguiu os passos anteriores corretamente, EC2_maindbA, mas confira o IPv4 privado)
+  * Selecione em Ações a opção Imagem e Modelos, e depois a opção Criar Imagem
+  * Apenas dê um nome para a imagem, e então selecione criar
+  * Demora 2 ~ 4 minutos para criar a imagem (No Dashboard EC2, selecione AMIs)
+  * Durante a criação da imagem, você provavelmente foi chutado da instância, e voltou para a pasta do projeto
+  * Senão, saia da instância
+```sh
+/~/tasks/tasks/templates/tasks # exit
+```
+  * No terminal, na pasta do projeto, destrua os recursos usando os comandos a seguir na ordem dada, para evitar que fique destruindo para sempre
+
+```sh
+/projeto_cloud # terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
+/projeto_cloud # terraform destroy
+```
+  * Descomente os arquivos rds.tf e provisioner.tf
+  * Mude o id das imagens das instâncias EC2 em ec2.tf para o id da imagem AMI que você criou
+  * Volte no readme para a parte Executando projeto
+
+[Executando Projeto](#Executa)
+
+
+
