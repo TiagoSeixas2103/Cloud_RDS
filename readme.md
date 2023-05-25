@@ -287,7 +287,8 @@ Caso queira entrar na Instância EC2_readDB2:
 
   * Para destruir os recursos, rode primeiro o seguinte comando:
 ```sh
-terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
+/projeto_cloud # terraform init
+/projeto_cloud # terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
 ```
 ### Demora cerca de 10~15 minutos para que os recursos sejam destruídos
 ### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
@@ -295,7 +296,7 @@ terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-read
   * Por fim, destrua o resto dos recursos
 
 ```sh
-terraform destroy
+/projeto_cloud # terraform destroy
 ```
 ### Demora cerca de 1~2 minutos para que o resto dos recursos sejam destruídos
 ### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
@@ -567,7 +568,7 @@ def index(request):
   * Selecione no Dashboard das Instâncias EC2 a Instância na qual você está conectado (se seguiu os passos anteriores corretamente, EC2_maindbA, mas confira o IPv4 privado)
   * Selecione em Ações a opção Imagem e Modelos, e depois a opção Criar Imagem
   * Apenas dê um nome para a imagem, e então selecione criar
-  * Demora 2 ~ 4 minutos para criar a imagem (No Dashboard EC2, selecione AMIs)
+  * Demora 4 ~ 8 minutos para criar a imagem (No Dashboard EC2, selecione AMIs)
   * Durante a criação da imagem, você provavelmente foi chutado da instância, e voltou para a pasta do projeto
   * Senão, saia da instância
 ```sh
