@@ -51,7 +51,7 @@ projeto_cloud/
 
 - rds.tf
   * Determina a AWS como provider, assim como a região do deploy
-  * Faz deploy da database principal (Instância RDS Main Multi-AZ) e das suas réplicas de leitura
+  * Cria a database principal (Instância RDS Main Multi-AZ) e as suas réplicas de leitura
 
 - ec2.tf
   * Cria 4 instâncias EC2:
