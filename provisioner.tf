@@ -1,7 +1,8 @@
 # Adiciona variáveis geradas na criação dos recursos ao arquivo executável
 # que cria a database usada pela aplicação Django 
 resource "null_resource" "provisioner" {
-  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_db_instance.mainDB]
+  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_db_instance.mainDB, aws_db_instance.readDB1, aws_instance.EC2-readDB1,
+  aws_db_instance.readDB2, aws_instance.EC2-readDB2, local_file.KEY-1, local_file.KEY-2, local_file.KEY-3, local_file.KEY-4]
 
   provisioner "remote-exec" {
     inline = [
@@ -76,7 +77,8 @@ resource "null_resource" "provisioner" {
 # Andiciona ID de EFS no arquivo de montagem de EFS nas Instâncias EC2
 resource "null_resource" "provisioner2" {
   depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_instance.EC2-readDB1, aws_instance.EC2-readDB2,
-  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B]
+  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B, local_file.KEY-1, local_file.KEY-2,
+  local_file.KEY-3, local_file.KEY-4]
 
   provisioner "remote-exec" {
     inline = [

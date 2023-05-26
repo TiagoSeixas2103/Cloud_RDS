@@ -50,6 +50,10 @@ projeto_cloud/
 └── readme.md
 ```
 
+### <span style="color:red">Atenção!</span> 
+### A maior parte dos códigos a seguir são representativos!
+### Não saia copiando!
+
 - rds.tf
   * Determina a AWS como provider, assim como a região do deploy
   * Cria a database principal (Instância RDS Main Multi-AZ) e as suas réplicas de leitura
@@ -60,32 +64,34 @@ provider "aws" {
 
 # Instância RDS Principal
 resource "aws_db_instance" "mainDB" {
-    identifier               = "db-01"          # Nome de identificação do RDS
-    engine                   = "mysql"          # Engine usada
-    engine_version           = "8.0.32"         # Versão da engine
-    instance_class           = "db.t2.micro"    # Classe da instância
-    username                 = var.username     # Usuário da conexão RDS
-    password                 = var.password     # Senha da conexão RDS
-    multi_az                 = true             # Define se RDS tem cópia reserva em outra Zona de Disponibilidade
-    allocated_storage        = 20               # Quantidade de armazenamento alocado
-    backup_retention_period  = 1                # Período de retenção do backup automático do RDS (dias)
-    skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
+  depends_on = [aws_security_group.acesso-ssh-DatabaseA, aws_security_group.acesso-ssh-DatabaseB, aws_db_subnet_group.subnet-database-group]
+  identifier               = "db-01"          # Nome de identificação do RDS
+  engine                   = "mysql"          # Engine usada
+  engine_version           = "8.0.32"         # Versão da engine
+  instance_class           = "db.t2.micro"    # Classe da instância
+  username                 = var.username     # Usuário da conexão RDS
+  password                 = var.password     # Senha da conexão RDS
+  multi_az                 = true             # Define se RDS tem cópia reserva em outra Zona de Disponibilidade
+  allocated_storage        = 20               # Quantidade de armazenamento alocado
+  backup_retention_period  = 1                # Período de retenção do backup automático do RDS (dias)
+  skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
 
-    vpc_security_group_ids   = [aws_security_group.acesso-ssh-DatabaseA.id, aws_security_group.acesso-ssh-DatabaseB.id]      # Grupo de Segurança
-    db_subnet_group_name     = aws_db_subnet_group.subnet-database-group.name   # Grupo de subredes
+  vpc_security_group_ids   = [aws_security_group.acesso-ssh-DatabaseA.id, aws_security_group.acesso-ssh-DatabaseB.id]      # Grupo de Segurança
+  db_subnet_group_name     = aws_db_subnet_group.subnet-database-group.name   # Grupo de subredes
 }
 
 # Exemplo de criação de RDS Read Replica
 resource "aws_db_instance" "exemplo" {
-    identifier               = "exemplo"     # Nome de identificação do RDS
-    engine                   = "mysql"          # Engine usada
-    engine_version           = "8.0.32"         # Versão da engine
-    instance_class           = "db.t2.micro"    # Classe da instância
-    replicate_source_db      = aws_db_instance.mainDB.identifier    # Recurso RDS usado como fonte de replicação
-    skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
+  depends_on = [aws_db_instance.mainDB, aws_security_group.acesso-ssh-Database-exemplo]
+  identifier               = "exemplo"     # Nome de identificação do RDS
+  engine                   = "mysql"          # Engine usada
+  engine_version           = "8.0.32"         # Versão da engine
+  instance_class           = "db.t2.micro"    # Classe da instância
+  replicate_source_db      = aws_db_instance.mainDB.identifier    # Recurso RDS usado como fonte de replicação
+  skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
 
-    availability_zone        = "us-east-1x"     # Zona de disponibilidade da instância
-    vpc_security_group_ids   = [aws_security_group.acesso-ssh-Database-exemplo.id]      # Grupo de Segurança
+  availability_zone        = "us-east-1x"     # Zona de disponibilidade da instância
+  vpc_security_group_ids   = [aws_security_group.acesso-ssh-Database-exemplo.id]      # Grupo de Segurança
 }
 ```
 
@@ -96,16 +102,17 @@ resource "aws_db_instance" "exemplo" {
 ```sh
 # Exemplo de criação de EC2
 resource "aws_instance" "EC2-exemplo" {
-    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
-    instance_type   = "t2.micro"                            # Tipo de instância EC2
-    key_name        = aws_key_pair.chave-exemplo.key_name    # Key Pair utilizado
-    tags            = {
-        Name        = "EC2_exemplo"
-    }
+  depends_on = [aws_key_pair.chave-exemplo, aws_security_group.acesso-ssh-Regiaox, aws_subnet.public_subnet_us_east_1x]
+  ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
+  instance_type   = "t2.micro"                            # Tipo de instância EC2
+  key_name        = aws_key_pair.chave-exemplo.key_name    # Key Pair utilizado
+  tags            = {
+      Name        = "EC2_exemplo"
+  }
 
-    availability_zone        = "us-east-1a"                 # Zona de disponibilidade da instância
-    vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiaox.id}"]    # Grupo de Segurança
-    subnet_id              = aws_subnet.public_subnet_us_east_1x.id             # Id da Subrede
+  availability_zone        = "us-east-1a"                 # Zona de disponibilidade da instância
+  vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiaox.id}"]    # Grupo de Segurança
+  subnet_id              = aws_subnet.public_subnet_us_east_1x.id             # Id da Subrede
 }
 ```
 
@@ -117,6 +124,7 @@ resource "aws_instance" "EC2-exemplo" {
 ```sh
 # Exemplo de criação de Security Group (EC2)
 resource "aws_security_group" "acesso-ssh-Regiaox" {
+  depends_on = [aws_vpc.vpc_database]
   name        = "acesso-sshx"
   description = "Allow SSH inbound traffic"
   vpc_id = aws_vpc.vpc_database.id
@@ -158,6 +166,7 @@ resource "aws_security_group" "acesso-ssh-Regiaox" {
 
 # Exemplo de criação de Security Group (RDS)
 resource "aws_security_group" "acesso-ssh-DatabaseX" {
+  depends_on = [aws_vpc.vpc_database, aws_instance.EC2-exemplo]
   name        = "acesso-ssh-dbX"
   description = "Allow EC2 instance to connect to RDS instance"
   vpc_id = aws_vpc.vpc_database.id
@@ -193,17 +202,19 @@ resource "aws_security_group" "acesso-ssh-DatabaseX" {
 ```sh
 # VPC
 resource "aws_vpc" "vpc_database" {
-    cidr_block = "10.0.0.0/16"
-    enable_dns_hostnames = true
+  cidr_block = "10.0.0.0/16"
+  enable_dns_hostnames = true
 }
 
 # Internet gateway
 resource "aws_internet_gateway" "internet_gateway" {
+  depends_on = [aws_vpc.vpc_database]
   vpc_id = aws_vpc.vpc_database.id
 }
 
 # Tabela de Roteamento
 resource "aws_route_table" "public_subnet_route_table" {
+  depends_on = [aws_vpc.vpc_database, aws_internet_gateway.internet_gateway]
   vpc_id = aws_vpc.vpc_database.id
 
   route {
@@ -214,16 +225,37 @@ resource "aws_route_table" "public_subnet_route_table" {
 
 # Exemplo de criação de Sub-rede Pública
 resource "aws_subnet" "public_subnet_us_east_1x" {
-    vpc_id = aws_vpc.vpc_database.id
-    cidr_block = "10.0.0.0/24"
-    availability_zone = "us-east-1x"
-    map_public_ip_on_launch = true
+  depends_on = [aws_vpc.vpc_database]
+  vpc_id = aws_vpc.vpc_database.id
+  cidr_block = "10.0.0.0/24"
+  availability_zone = "us-east-1x"
+  map_public_ip_on_launch = true
 }
 
 # Exemplo de associação de sub-rede pública com Tabela de Roteamento
 resource "aws_route_table_association" "public_subnet_association_x" {
+  depends_on = [aws_subnet.public_subnet_us_east_1x, aws_route_table.public_subnet_route_table]
   subnet_id      = aws_subnet.public_subnet_us_east_1x.id
   route_table_id = aws_route_table.public_subnet_route_table.id
+}
+
+# Exemplo de criação de Sub-rede Privada
+resource "aws_subnet" "private_subnet_us_east_1a" {
+  depends_on = [aws_vpc.vpc_database]
+  vpc_id = aws_vpc.vpc_database.id
+  cidr_block = "10.0.0.0/24"
+  availability_zone = "us-east-1x"
+}
+
+# Grupo de Sub-redes privadas
+resource "aws_db_subnet_group" "subnet-database-group" {
+  depends_on = [aws_subnet.private_subnet_us_east_1a, aws_subnet.private_subnet_us_east_1b]
+  name       = "subnet-database-group-region1"
+  subnet_ids = [aws_subnet.private_subnet_us_east_1a.id, aws_subnet.private_subnet_us_east_1b.id]
+
+  tags = {
+    Name = "DB-SubnetGroup-Region1"
+  }
 }
 ```
 
@@ -240,12 +272,14 @@ resource "tls_private_key" "rsax" {
 
 # Exemplo de criação de Key Pair
 resource "aws_key_pair" "chave-maindbX" {
+  depends_on = [tls_private_key.rsax]
   key_name   = "chave-maindbX"
   public_key = tls_private_key.rsax.public_key_openssh
 }
 
 # Exemplo de Chave Privada X - Salva em Arquivo Local
 resource "local_file" "KEY-x" {
+  depends_on = [tls_private_key.rsax]
   content  = tls_private_key.rsax.private_key_pem
   filename = "KEYx.pem"
 }
@@ -265,6 +299,7 @@ resource "aws_efs_file_system" "EFS" {
 
 # Exemplo de criação de ponto de destino
 resource "aws_efs_mount_target" "EFS_X" {
+  depends_on = [aws_efs_file_system.EFS, aws_subnet.public_subnet_us_east_1x, aws_security_group.acesso-ssh-Regiaox]
   file_system_id  = aws_efs_file_system.EFS.id                  # ID do EFS
   subnet_id       = aws_subnet.public_subnet_us_east_1x.id      # ID da Sub-rede
   security_groups = [aws_security_group.acesso-ssh-Regiaox.id]  # Grupo de Segurança
@@ -276,7 +311,8 @@ resource "aws_efs_mount_target" "EFS_X" {
   * Cria provisoners que atualiza arquivo creatEFS.sh com ID de aws_efs_file_system nas instâncias EC2 após apply
 ```sh
 resource "null_resource" "provisioner" {
-  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_db_instance.mainDB]
+  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_db_instance.mainDB, aws_db_instance.readDB1, aws_instance.EC2-readDB1,
+  aws_db_instance.readDB2, aws_instance.EC2-readDB2, local_file.KEY-1, local_file.KEY-2, local_file.KEY-3, local_file.KEY-4]
 
   # Exemplo de provisioner
   provisioner "remote-exec" {
@@ -299,7 +335,8 @@ resource "null_resource" "provisioner" {
 
 resource "null_resource" "provisioner2" {
   depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_instance.EC2-readDB1, aws_instance.EC2-readDB2,
-  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B]
+  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B, local_file.KEY-1, local_file.KEY-2,
+  local_file.KEY-3, local_file.KEY-4]
 
   # Exemplo de provisioner
  provisioner "remote-exec" {
@@ -375,11 +412,26 @@ variable "password" {
 ### Demora cerca de 25~35 minutos para que todos os recursos sejam criados
 ### Caso alguma instância RDS READ não seja criada, por algum problema ocorrido no apply (Instabilidade de Rede, por exemplo), repita as etapas de criar e executar o plano
 ### Espere até receber a mensagem <span style="color:green">Apply complete!</span>
+### Confira no AWS Management Console se a Zona de disponibilidade é us-east-1a ou us-east-1b, para fazer o teste de failover de Multi A-Z corretamente
 
- * Confira no AWS Management Console se a Zona de disponibilidade é us-east-1a ou us-east-1b, para depois fazer o teste de failover de Multi A-Z corretamente
- * Uma vez que todas as instâncias foram criadas, conecte-se à instância EC2_maindbA ou EC2-maindbB (dependendo da Zona) pelo AWS Management Console ou pelo terminal da sua máquina
- * Devido a problemas de copy paste no terminal de conexão fornecido pela AWS, esse projeto foi feito realizando a conexão pelo terminal do computador
- * Para conectar-se pelo terminal do seu computador, será necessário pegar o DNS IPv4 público dessa instância na AWS, e usá-lo em um dos comandos que seguem:
+#<a name="MULTI"></a>
+## Testando Multi A-Z
+  * Cheque se a database db-01 é Multi-AZ no AWS Management Console
+  * Para checar a transição de zona do RDS MAIN, selecione o RDS db-01 no AWS Management Console e, em ações, selecione Reinicializar (reboot), selecionando a opção com failover
+### <span style="color:red">Atenção!</span> 
+### O Failover pode levar alguns minutos APÓS a Reinicialização
+### Dê refresh na página a cada minuto
+### Cuidado que o failover planejado pode não ocorrer se tiver alguma database criada no RDS MAIN
+### Caso você tenha se apressado e rodado o executável createdb.sh antes de testar o Multi-AZ, clique no link
+### Caso contrário, continue
+[Destrói Database](#DB)
+
+  * Ao checar a Zona de Disponibilidade, você verá que ela mudou
+
+## Testando Aplicação Django
+  * Com todos os recursos criados, conecte-se à instância EC2_maindbA ou EC2-maindbB (dependendo da Zona) pelo AWS Management Console ou pelo terminal da sua máquina
+  * Devido a problemas de copy paste no terminal de conexão fornecido pela AWS, esse projeto foi feito realizando a conexão pelo terminal do computador
+  * Para conectar-se pelo terminal do seu computador, será necessário pegar o DNS IPv4 público dessa instância na AWS, e usá-lo em um dos comandos que seguem:
 
 Caso queira entrar na Instância EC2_maindbA:
 ```sh
@@ -406,15 +458,15 @@ Caso queira entrar na Instância EC2_maindbB:
 ```sh
 Password: #[Insira senha]
 ```
-  * Se você não colocou a senha, ou recebeu uma mensagem de que não conseguiu se conectar ao mysql, rode o executável novamente e coloque a senha corretamente dessa vez
+  * Se você não colocou a senha, ou recebeu uma mensagem de que não conseguiu se conectar ao mysql,
+  rode o executável novamente e coloque a senha corretamente dessa vez
   * Se estiver conectado ao EC2 pelo conector da própria AWS, você terá que digitar manualmente a senha
   * Por isso foi recomendado anteriormente que você realizasse a conexão pelo terminal da sua máquina
   * Caso tenha dado tudo certo, você não receberá nenhuma mensagem de output
-  * Se você rodar o executável de novo, e preencher o campo de senha corretamente mais uma vez, você receberá uma mensagem de alerta de que a database que você está tentando criar já existe
-
-## Testando django
-
-  * Agora que o seu django tem uma database para utilizar, volte para a pasta tasks, crie o superuser, baixe as bibliotecas e realize as migrações necessárias
+  * Se você rodar o executável de novo, e preencher o campo de senha corretamente mais uma vez, 
+  você receberá uma mensagem de alerta de que a database que você está tentando criar já existe
+  * Agora que o seu django tem uma database para utilizar, volte para a pasta tasks, crie o superuser, 
+  baixe as bibliotecas e realize as migrações necessárias
   * Há um executável que faz isso, feito por Raul Ikeda
 ```sh
 /~/tasks/portfolio # cd ..
@@ -432,23 +484,6 @@ http://[IPv4]:8000/admin
 ```
   * No caso desse projeto, foi usado o usuário 'cloud' e a senha 'cloud' para criar o superuser do django no executável 'install.sh' 
   * Quando você adicionar uma task ao django pela aba admin, você pode ver que ela foi criada dando refresh na outra aba
-
-## Testando Failover Zona Main (Multi A-Z)
-  * Selecione o RDS mainDB no AWS Management Console e, em ações, selecione Reinicializar (reboot), selecionando a opção com failover
-### <span style="color:red">Atenção!</span> 
-### Espere de 1 a 3 minutos APÓS a reinicialização terminar!
-  * Ao checar a Zona de Disponibilidade, você verá que ela mudou
-  * Caso você tenha seguido corretamente os passos anteriores, a EC2 na qual você está conectado não se encontra na mesma Zona que a RDS Primária
-  * Se quiser testar se a database continua funcionando, mude para uma das instâncias EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região atual do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
-Caso queira entrar na Instância EC2_maindbA:
-```sh
-/projeto_cloud # ssh -i KEY1.pem ubuntu@[Inserir IPV4 EC2_maindbA]
-```
-Caso queira entrar na Instância EC2_maindbB:
-```sh
-/projeto_cloud # ssh -i KEY2.pem ubuntu@[Inserir IPV4 EC2_maindbB]
-```
-### Importante lembrar que a chave .pem para acessar essa nova instância é diferente em cada EC2
 
 ## Testando EFS
   * Entre em DUAS instâncias EC2 quaisquer
@@ -816,5 +851,33 @@ def index(request):
 ### Procure pelo título Executando projeto, conforme sobe no readme, ou clique no link se estiver lendo o readme no github, para começar a arquitetura do projeto
 [Executando Projeto](#Executa)
 
+#<a name="DB"></a>
+# Destruindo Database
+  * Na pasta portfolio, altere a última linha do arquivo 
+```sh
+/~ # cd tasks/portfolio
+/~/tasks/portfolio # sudo nano createdb.sh
+```
+```sh
+mysql -h "$DB_HOST" -u "$DB_USER" -e "DROP DATABASE $DB_NAME;" -p
+```
+  * Salve com Ctrl+X, seguido de Y para confirmar as mudanças, e Enter
+  * Execute o arquivo alterado
+```sh
+/~/tasks/portfolio # ./createdb.sh
+```
+### Lembre-se, é necessário colocar a senha do arquivo credentials.tf, que é a senha do RDS, para poder acessá-lo
+```sh
+Password: #[Insira senha]
+```
+  * Entre novamente no arquivo e altere a última linha para a forma que estava antes
+```sh
+/~/tasks/portfolio # sudo nano createdb.sh
+```
+```sh
+mysql -h "$DB_HOST" -u "$DB_USER" -e "CREATE DATABASE $DB_NAME;" -p
+```
+  * Refaça o teste de Multi-AZ
+[Teste Multi-AZ](#MULTI)
 
 

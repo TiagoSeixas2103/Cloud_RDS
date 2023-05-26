@@ -4,6 +4,7 @@ provider "aws" {
 
 #Instância RDS Principal
 resource "aws_db_instance" "mainDB" {
+    depends_on = [aws_security_group.acesso-ssh-DatabaseA, aws_security_group.acesso-ssh-DatabaseB, aws_db_subnet_group.subnet-database-group]
     identifier               = "db-01"          # Nome de identificação do RDS
     engine                   = "mysql"          # Engine usada
     engine_version           = "8.0.32"         # Versão da engine
@@ -21,6 +22,7 @@ resource "aws_db_instance" "mainDB" {
 
 #Instância RDS Réplica de Leitura Zona A
 resource "aws_db_instance" "readDB1" {
+    depends_on = [aws_db_instance.mainDB, aws_security_group.acesso-ssh-Database-readDB1]
     identifier               = "db-read-01"     # Nome de identificação do RDS
     engine                   = "mysql"          # Engine usada
     engine_version           = "8.0.32"         # Versão da engine
@@ -34,6 +36,7 @@ resource "aws_db_instance" "readDB1" {
 
 #Instância RDS Réplica de Leitura Zona B
 resource "aws_db_instance" "readDB2" {
+    depends_on = [aws_db_instance.mainDB, aws_security_group.acesso-ssh-Database-readDB2]
     identifier               = "db-read-02"     # Nome de identificação do RDS
     engine                   = "mysql"          # Engine usada
     engine_version           = "8.0.32"         # Versão da engine
