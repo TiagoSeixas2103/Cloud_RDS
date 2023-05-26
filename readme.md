@@ -196,8 +196,8 @@ http://[IPv4]:8000/admin
 ### <span style="color:red">Atenção!</span> 
 ### Espere de 1 a 3 minutos APÓS a reinicialização terminar!
   * Ao checar a Zona de Disponibilidade, você verá que ela mudou
-  * Caso você tenha seguido corretamente os passos anteriores, a EC2 na qual você está conectado se encontra na mesma Zona que a RDS Primária
-  * Mude para a instância EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região original do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
+  * Caso você tenha seguido corretamente os passos anteriores, a EC2 na qual você está conectado não se encontra na mesma Zona que a RDS Primária
+  * Mude para uma das instâncias EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região atual do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
 Caso queira entrar na Instância EC2_maindbA:
 ```sh
 /projeto_cloud # ssh -i KEY1.pem ubuntu@[Inserir IPV4 EC2_maindbA]
