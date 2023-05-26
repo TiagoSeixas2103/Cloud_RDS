@@ -197,7 +197,7 @@ http://[IPv4]:8000/admin
 ### Espere de 1 a 3 minutos APÓS a reinicialização terminar!
   * Ao checar a Zona de Disponibilidade, você verá que ela mudou
   * Caso você tenha seguido corretamente os passos anteriores, a EC2 na qual você está conectado não se encontra na mesma Zona que a RDS Primária
-  * Mude para uma das instâncias EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região atual do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
+  * Se quiser testar se a database continua funcionando, mude para uma das instâncias EC2_maindb (EC2_maindbA ou EC2_maindbB, dependendo da região atual do seu mainDB) na outra Zona usando os comandos fornecidos anteriormente, mas com o DNS da nova instância EC2 na qual você está tentando se conectar
 Caso queira entrar na Instância EC2_maindbA:
 ```sh
 /projeto_cloud # ssh -i KEY1.pem ubuntu@[Inserir IPV4 EC2_maindbA]
@@ -209,7 +209,7 @@ Caso queira entrar na Instância EC2_maindbB:
 ### Importante lembrar que a chave .pem para acessar essa nova instância é diferente em cada EC2
 
 ## Testando EFS
-  * Entre em duas instâncias EC2 quaisquer
+  * Entre em DUAS instâncias EC2 quaisquer
   Caso queira entrar na Instância EC2_maindbA:
 ```sh
 /projeto_cloud # ssh -i KEY1.pem ubuntu@[Inserir IPV4 EC2_maindbA]
@@ -232,16 +232,16 @@ Caso queira entrar na Instância EC2_readDB2:
 ```sh
 /~/tasks # cd
 ```
-  * Execute o arquivo de montagem do EFS nas duas Instâncias EC2
+  * Execute o arquivo de montagem do EFS nas DUAS Instâncias EC2
 ```sh
 /~ # sudo ./creatEFS.sh
 ```
-  * Entre na pasta EFS criada nas duas Instâncias EC2, e veja o conteúdo delas
+  * Entre na pasta EFS criada nas DUAS Instâncias EC2, e veja o conteúdo delas
 ```sh
 /~ # cd EFS
 /~/EFS # ls
 ```
-  * Em uma das instâncias, crie um arquivo qualquer
+  * Em qualquer uma das instâncias, crie um arquivo qualquer
 ```sh
 /~/EFS # sudo touch teste.txt
 ```
