@@ -547,11 +547,26 @@ def index(request):
 ```
   * No terminal, na pasta do projeto, destrua os recursos usando os comandos a seguir na ordem dada, para evitar que fique destruindo para sempre
 
+### <span style="color:red">Atenção!</span> 
+### NÃO dê terraform destroy direto!
+### Se você fizer isso, tem altas chances de ficar esperando a destruição dos recursos para sempre!
+
+  * Para destruir os recursos, rode primeiro o seguinte comando:
 ```sh
 /projeto_cloud # terraform init
 /projeto_cloud # terraform destroy -target=aws_instance.EC2-readDB1 -target=aws_instance.EC2-readDB2 -target=aws_instance.EC2-maindbA -target=aws_instance.EC2-maindbB
+```
+### Demora cerca de 10~15 minutos para que os recursos sejam destruídos
+### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
+
+  * Por fim, destrua o resto dos recursos
+
+```sh
 /projeto_cloud # terraform destroy
 ```
+### Demora cerca de 1~2 minutos para que o resto dos recursos sejam destruídos
+### Espere até receber a mensagem <span style="color:green">Destroy complete!</span>
+
   * Descomente os arquivos rds.tf e provisioner.tf
   * Mude o id das imagens das instâncias EC2 em ec2.tf para o id da imagem AMI que você criou
   * Volte no readme para a parte Executando projeto
