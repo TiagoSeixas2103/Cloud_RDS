@@ -3,6 +3,7 @@ Título: Projeto Cloud - RDS
 Autor: Tiago Vitorino Seixas
 
 ---
+<img src="./ArquiteturaRDS.png" width="50%" alt="Arquitetura nuvem">
 
 ## Documentações das ferramentas de desenvolvimento utilizadas:
 
@@ -131,7 +132,8 @@ projeto_cloud/
 /projeto_cloud # terraform apply "plano"
 ```
 
-### Demora cerca de 25~30 minutos para que todos os recursos sejam criados
+### Demora cerca de 25~35 minutos para que todos os recursos sejam criados
+### Caso alguma instância RDS READ não seja criada, por algum problema ocorrido no apply (Instabilidade de Rede, por exemplo), repita as etapas de criar e executar o plano
 ### Espere até receber a mensagem <span style="color:green">Apply complete!</span>
 
  * Confira no AWS Management Console se a Zona de disponibilidade é us-east-1a ou us-east-1b, para depois fazer o teste de failover de Multi A-Z corretamente
