@@ -3,7 +3,7 @@ Título: Projeto Cloud - RDS
 Autor: Tiago Vitorino Seixas
 
 ---
-<img src="./ArquiteturaRDS.png" width="75%" alt="Arquitetura nuvem">
+<img src="./ArquiteturaRDS.png" width="85%" alt="Arquitetura nuvem">
 
 ## Documentações das ferramentas de desenvolvimento utilizadas:
 
