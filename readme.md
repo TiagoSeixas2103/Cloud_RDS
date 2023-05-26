@@ -49,74 +49,45 @@ projeto_cloud/
 └── readme.md
 ```
 
-Relational Database Service
 - rds.tf
-  * provider "aws" - determina região do deploy
-  * aws_db_instance "mainDB" - RDS DB instância principal e secundária em espera (Multi-AZ)
-  * aws_db_instance "readDB1" - RDS DB instância de réplica de leitura (Zona us-east-1a)
-  * aws_db_instance "readDB2" - RDS DB instância de réplica de leitura (Zona us-east-1b)
+  * Determina a AWS como provider, assim como a região do deploy
+  * Faz deploy da database principal (Instância RDS Main Multi-AZ) e das suas réplicas de leitura
 
-Elastic Compute Cloud
 - ec2.tf
-  * aws_instance "EC2-maindbA" - Servidor Web de Produção (Zona us-east-1a)
-  * aws_instance "EC2-maindbB" - Servidor Web de Produção (Zona us-east-1b)
-  * aws_instance "EC2-readDB1" - Servidor de Relatórios de Produção (Zona us-east-1a)
-  * aws_instance "EC2-readDB2" - Servidor de Relatórios de Produção (Zona us-east-1b)
+  * Cria 4 instâncias EC2:
+    * Uma instância para cada réplica de leitura (RDS)
+    * Uma instância em cada Zona de Disponibilidade para a database principal (RDS)
 
-Security Group
 - sg.tf
-  * aws_security_group "acesso-ssh-Regiao1" - Grupo de Segurança Instância EC2-maindbA
-  * aws_security_group "acesso-ssh-Regiao2" - Grupo de Segurança Instância EC2-maindbB
-  * aws_security_group "acesso-ssh-DatabaseA" - Grupo de Segurança Instância RDS mainDB (conecta com EC2-maindbA)
-  * aws_security_group "acesso-ssh-DatabaseB" - Grupo de Segurança Instância RDS mainDB (conecta com EC2-maindbB)
-  * aws_security_group "acesso-ssh-Regiao1-read" - Grupo de Segurança Instância EC2-readDB1 
-  * aws_security_group "acesso-ssh-Database-readDB1" - Grupo de Segurança Instância RDS readDB1 (conecta com EC2-readDB1)
-  * aws_security_group "acesso-ssh-Regiao2-read" - Grupo de Segurança Instância EC2-readDB2
-  * aws_security_group "acesso-ssh-Database-readDB2" - Grupo de Segurança Instância RDS readDB2 (conecta com EC2-readDB2)
+  * Cria 8 Grupos de segurança:
+    * Um para cada uma das 4 instâncias EC2
+    * Um para cada uma das duas réplica de leitura (RDS)
+    * Dois para a database principal (cada um conecta a uma instância EC2)
 
-Subnet
 - subnet.tf
-  * aws_vpc "vpc_database" - Nuvem Privada
-  * aws_internet_gateway "internet_gateway" - Gateway entre vpc_database e Internet
-  * aws_route_table "public_subnet_route_table" - Tabela para roteamento das sub-redes internas de vpc_database (permite conectá-las à Internet)
-  * aws_subnet "public_subnet_us_east_1a" - Sub-rede pública (Zona us-east-1a)
-  * aws_route_table_association "public_subnet_association_a" - Associação da sub-rede pública à aws_route_table (Zona us-east-1a)
-  * aws_subnet "public_subnet_us_east_1b" - Sub-rede pública (Zona us-east-1b)
-  * aws_route_table_association "public_subnet_association_b" - Associação da sub-rede pública à aws_route_table (Zona us-east-1b)
-  * aws_subnet "private_subnet_us_east_1a" - Sub-rede privada (Zona us-east-1a)
-  * aws_subnet "private_subnet_us_east_1b" - Sub-rede privada (Zona us-east-1b)
-  * aws_db_subnet_group "subnet-database-group" - Grupo de sub-redes privadas (RDS Multi-AZ)
+  * Cria uma Nuvem Privada (VPC)
+  * Cria um Gateway entre Nuvem Privada e Internet
+  * Cria uma tabela para roteamento das sub-redes internas da Nuvem Privada (permite conectá-las à Internet)
+  * Cria duas sub-redes públicas, uma em cada Zona de Disponibilidade
+  * Faz associação das sub-redes públicas à tabela de roteamento
+  * Cria duas sub-redes privadas, uma em cada Zona de Disponibilidade
+  * Cria o grupo de sub-redes privadas
 
-Key Pair
 - key.tf
-  * tls_private_key "rsa1" - Cria chave privada
-  * aws_key_pair "chave-maindbA" - Cria Key Pair usando rsa1 e associa à uma instância EC2 (EC2-maindbA)
-  * local_file "KEY-1" - Cria um arquivo local .pem para conexão remota com instância EC2 (EC2-maindbA)
-  * tls_private_key "rsa2" - Cria chave privada
-  * aws_key_pair "chave-maindbB" - Cria Key Pair usando rsa2 e associa à uma instância EC2 (EC2-maindbB)
-  * local_file "KEY-2" - Cria um arquivo local .pem para conexão remota com instância EC2 (EC2-maindbB)
-  * tls_private_key "rsa3" - Cria chave privada
-  * aws_key_pair "chave-readdb1" - Cria Key Pair usando rsa3 e associa à uma instância EC2 (EC2-readDB1)
-  * local_file "KEY-3" - Cria um arquivo local .pem para conexão remota com instância EC2 (EC2-readDB1)
-  * tls_private_key "rsa4" - Cria chave privada
-  * aws_key_pair "chave-readdb2" - Cria Key Pair usando rsa4 e associa à uma instância EC2 (EC2-readDB2)
-  * local_file "KEY-4" - Cria um arquivo local .pem para conexão remota com instância EC2 (EC2-readDB2)
+  * Cria 4 pares de chaves, um para cada instância EC2
+  * Cria um arquivo .pem no local do projeto para cada par de chaves
 
-Elastic File System
 - efs.tf
-  * aws_efs_file_system "EFS" - Cria EFS
-  * aws_efs_mount_target "EFS_A" - Monta Região de acesso na sub-rede pública (Zona us-east-1a)
-  * aws_efs_mount_target "EFS_B" - Monta Região de acesso na sub-rede pública (Zona us-east-1b)
+  * Cria um EFS (Elastic File System)
+  * Monta dois pontos de destino, um em cada Zona de Disponibilidade (permite que EC2s nessas Zonas acessem o EFS)
 
-Provisioner
 - provisioner.tf
-  * null_resource "provisioner" - Atualiza arquivo createdb.sh com host, usuário e senha do RDS associado nas instâncias EC2 após apply
-  * null_resource "provisioner2" - Atualiza arquivo creatEFS.sh com ID de aws_efs_file_system nas instâncias EC2 após apply
+  * Cria um provisoner que atualiza arquivo createdb.sh com host, usuário e senha do RDS associado nas instâncias EC2 após apply
+  * Cria um provisoner que atualiza arquivo creatEFS.sh com ID de aws_efs_file_system nas instâncias EC2 após apply
 
-Credentials
 - credentials.tf
-  * variable "username" - Usuário RDS
-  * variable "password" - Senha RDS
+  * Armazena variável com usuário da database (RDS)
+  * Armazena variável com senha da database (RDS)
 
 ### <span style="color:red">Atenção!</span> 
 ### NÃO continue sem ter um usuário na conta do grupo H!
