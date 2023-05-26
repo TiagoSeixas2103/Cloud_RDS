@@ -53,17 +53,134 @@ projeto_cloud/
 - rds.tf
   * Determina a AWS como provider, assim como a região do deploy
   * Cria a database principal (Instância RDS Main Multi-AZ) e as suas réplicas de leitura
+```sh
+provider "aws" {
+    region = "us-east-1" # Região da arquitetura
+}
+
+# Instância RDS Principal
+resource "aws_db_instance" "mainDB" {
+    identifier               = "db-01"          # Nome de identificação do RDS
+    engine                   = "mysql"          # Engine usada
+    engine_version           = "8.0.32"         # Versão da engine
+    instance_class           = "db.t2.micro"    # Classe da instância
+    username                 = var.username     # Usuário da conexão RDS
+    password                 = var.password     # Senha da conexão RDS
+    multi_az                 = true             # Define se RDS tem cópia reserva em outra Zona de Disponibilidade
+    allocated_storage        = 20               # Quantidade de armazenamento alocado
+    backup_retention_period  = 1                # Período de retenção do backup automático do RDS (dias)
+    skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
+
+    vpc_security_group_ids   = [aws_security_group.acesso-ssh-DatabaseA.id, aws_security_group.acesso-ssh-DatabaseB.id]      # Grupo de Segurança
+    db_subnet_group_name     = aws_db_subnet_group.subnet-database-group.name   # Grupo de subredes
+}
+
+# Exemplo de criação de RDS Read Replica
+resource "aws_db_instance" "exemplo" {
+    identifier               = "exemplo"     # Nome de identificação do RDS
+    engine                   = "mysql"          # Engine usada
+    engine_version           = "8.0.32"         # Versão da engine
+    instance_class           = "db.t2.micro"    # Classe da instância
+    replicate_source_db      = aws_db_instance.mainDB.identifier    # Recurso RDS usado como fonte de replicação
+    skip_final_snapshot      = true             # Indica se deve pular a criação de um snapshot do RDS para restauração do mesmo
+
+    availability_zone        = "us-east-1x"     # Zona de disponibilidade da instância
+    vpc_security_group_ids   = [aws_security_group.acesso-ssh-Database-exemplo.id]      # Grupo de Segurança
+}
+```
 
 - ec2.tf
   * Cria 4 instâncias EC2:
     * Uma instância para cada réplica de leitura (RDS)
     * Uma instância em cada Zona de Disponibilidade para a database principal (RDS)
+```sh
+# Exemplo de criação de EC2
+resource "aws_instance" "EC2-exemplo" {
+    ami             = "ami-059c9094eadbcd5ca"               # Imagem ubuntu personalizada
+    instance_type   = "t2.micro"                            # Tipo de instância EC2
+    key_name        = aws_key_pair.chave-exemplo.key_name    # Key Pair utilizado
+    tags            = {
+        Name        = "EC2_exemplo"
+    }
+
+    availability_zone        = "us-east-1a"                 # Zona de disponibilidade da instância
+    vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiaox.id}"]    # Grupo de Segurança
+    subnet_id              = aws_subnet.public_subnet_us_east_1x.id             # Id da Subrede
+}
+```
 
 - sg.tf
   * Cria 8 Grupos de segurança:
     * Um para cada uma das 4 instâncias EC2
     * Um para cada uma das duas réplica de leitura (RDS)
     * Dois para a database principal (cada um conecta a uma instância EC2)
+```sh
+# Exemplo de criação de Security Group (EC2)
+resource "aws_security_group" "acesso-ssh-Regiaox" {
+  name        = "acesso-sshx"
+  description = "Allow SSH inbound traffic"
+  vpc_id = aws_vpc.vpc_database.id
+
+  ingress {
+    # SSH
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] 
+  }
+
+  ingress {
+    #EFS
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    # Conexão com django app
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "sshx"
+  }
+}
+
+# Exemplo de criação de Security Group (RDS)
+resource "aws_security_group" "acesso-ssh-DatabaseX" {
+  name        = "acesso-ssh-dbX"
+  description = "Allow EC2 instance to connect to RDS instance"
+  vpc_id = aws_vpc.vpc_database.id
+
+  ingress {
+    # Mysql connection
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_instance.EC2-exemplo.private_ip}/32"]
+  }
+  
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "sshx-maindbX"
+  }
+}
+```
 
 - subnet.tf
   * Cria uma Nuvem Privada (VPC)
@@ -73,22 +190,145 @@ projeto_cloud/
   * Faz associação das sub-redes públicas à tabela de roteamento
   * Cria duas sub-redes privadas, uma em cada Zona de Disponibilidade
   * Cria o grupo de sub-redes privadas
+```sh
+# VPC
+resource "aws_vpc" "vpc_database" {
+    cidr_block = "10.0.0.0/16"
+    enable_dns_hostnames = true
+}
+
+# Internet gateway
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.vpc_database.id
+}
+
+# Tabela de Roteamento
+resource "aws_route_table" "public_subnet_route_table" {
+  vpc_id = aws_vpc.vpc_database.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet_gateway.id
+  }
+}
+
+# Exemplo de criação de Sub-rede Pública
+resource "aws_subnet" "public_subnet_us_east_1x" {
+    vpc_id = aws_vpc.vpc_database.id
+    cidr_block = "10.0.0.0/24"
+    availability_zone = "us-east-1x"
+    map_public_ip_on_launch = true
+}
+
+# Exemplo de associação de sub-rede pública com Tabela de Roteamento
+resource "aws_route_table_association" "public_subnet_association_x" {
+  subnet_id      = aws_subnet.public_subnet_us_east_1x.id
+  route_table_id = aws_route_table.public_subnet_route_table.id
+}
+```
 
 - key.tf
   * Cria 4 pares de chaves, um para cada instância EC2
   * Cria um arquivo .pem no local do projeto para cada par de chaves
 
+```sh
+# Exemplo de criação de Chave Privada
+resource "tls_private_key" "rsax" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Exemplo de criação de Key Pair
+resource "aws_key_pair" "chave-maindbX" {
+  key_name   = "chave-maindbX"
+  public_key = tls_private_key.rsax.public_key_openssh
+}
+
+# Exemplo de Chave Privada X - Salva em Arquivo Local
+resource "local_file" "KEY-x" {
+  content  = tls_private_key.rsax.private_key_pem
+  filename = "KEYx.pem"
+}
+```
+
 - efs.tf
   * Cria um EFS (Elastic File System)
   * Monta dois pontos de destino, um em cada Zona de Disponibilidade (permite que EC2s nessas Zonas acessem o EFS)
+```sh
+resource "aws_efs_file_system" "EFS" {
+  creation_token = "EFS-MAIN"           # Nome EFS
+  encrypted      = false                # Sem criptografia
+  lifecycle_policy {
+    transition_to_ia = "AFTER_30_DAYS"  # Após 30 dias, dados sem uso frequente são armazenados em uma classe diferente (reduz custo)
+  }
+}
+
+# Exemplo de criação de ponto de destino
+resource "aws_efs_mount_target" "EFS_X" {
+  file_system_id  = aws_efs_file_system.EFS.id                  # ID do EFS
+  subnet_id       = aws_subnet.public_subnet_us_east_1x.id      # ID da Sub-rede
+  security_groups = [aws_security_group.acesso-ssh-Regiaox.id]  # Grupo de Segurança
+}
+```
 
 - provisioner.tf
-  * Cria um provisoner que atualiza arquivo createdb.sh com host, usuário e senha do RDS associado nas instâncias EC2 após apply
-  * Cria um provisoner que atualiza arquivo creatEFS.sh com ID de aws_efs_file_system nas instâncias EC2 após apply
+  * Cria provisoners que atualiza arquivo createdb.sh com host, usuário e senha do RDS associado nas instâncias EC2 após apply
+  * Cria provisoners que atualiza arquivo creatEFS.sh com ID de aws_efs_file_system nas instâncias EC2 após apply
+```sh
+resource "null_resource" "provisioner" {
+  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_db_instance.mainDB]
+
+  # Exemplo de provisioner
+  provisioner "remote-exec" {
+    inline = [
+      "cd tasks/portfolio",
+      "echo Current directory: $(pwd)",
+      "sed -i 's/endereco/${aws_db_instance.exemplo.address}/g' createdb.sh",
+      "sed -i 's/usuario/${var.username}/g' createdb.sh",
+      "sed -i 's/senha/${var.password}/g' createdb.sh",
+    ]
+
+    connection {
+      host        = aws_instance.EC2-exemplo.public_ip
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = local_file.KEY-x.content
+    }
+  }
+}
+
+resource "null_resource" "provisioner2" {
+  depends_on = [aws_instance.EC2-maindbA, aws_instance.EC2-maindbB, aws_instance.EC2-readDB1, aws_instance.EC2-readDB2,
+  aws_efs_file_system.EFS, aws_efs_mount_target.EFS_A, aws_efs_mount_target.EFS_B]
+
+  # Exemplo de provisioner
+ provisioner "remote-exec" {
+    inline = [
+      "sed -i 's/ID_EFS/${aws_efs_file_system.EFS.id}/g' creatEFS.sh",
+    ]
+
+    connection {
+      host        = aws_instance.EC2-exemplo.public_ip
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = local_file.KEY-x.content
+    }
+  }
+}
+```
 
 - credentials.tf
   * Armazena variável com usuário da database (RDS)
   * Armazena variável com senha da database (RDS)
+```sh
+variable "username" {
+    default = "admin" # Usuário RDS
+}
+
+variable "password" {
+    default = "SenHateste001" # Senha RDS
+}
+```
 
 ### <span style="color:red">Atenção!</span> 
 ### NÃO continue sem ter um usuário na conta do grupo H!

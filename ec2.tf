@@ -7,6 +7,7 @@ resource "aws_instance" "EC2-maindbA" {
         Name        = "EC2_maindbA"
     }
 
+    availability_zone        = "us-east-1a"                 # Zona de disponibilidade da instância
     vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiao1.id}"]    # Grupo de Segurança
     subnet_id              = aws_subnet.public_subnet_us_east_1a.id             # Id da Subrede
 }
@@ -20,6 +21,7 @@ resource "aws_instance" "EC2-maindbB" {
         Name        = "EC2_maindbB"
     }
 
+    availability_zone        = "us-east-1b"                 # Zona de disponibilidade da instância
     vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiao2.id}"]    # Grupo de Segurança
     subnet_id              = aws_subnet.public_subnet_us_east_1b.id             # Id da Subrede
 }
@@ -33,6 +35,7 @@ resource "aws_instance" "EC2-readDB1" {
         Name        = "EC2_readDB1"
     }
 
+    availability_zone        = "us-east-1a"                 # Zona de disponibilidade da instância
     vpc_security_group_ids = ["${aws_security_group.acesso-ssh-Regiao1-read.id}"]   # Grupo de Segurança
     subnet_id              = aws_subnet.public_subnet_us_east_1a.id                 # Id da Subrede
 }
